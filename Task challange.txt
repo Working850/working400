@@ -1,0 +1,981 @@
+//code of the Example app build with React and nodejs//
+
+import React, { useState } from 'react';
+
+function App() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (email === 'test@example.com' && password === 'password123') {
+      setMessage('Login successful!');
+    } else {
+      setMessage('Invalid credentials');
+    }
+  };
+
+  return (
+    <div>
+      <h1 data-testid="app-title">Login Form</h1>
+      <form onSubmit={handleLogin}>
+        <label htmlFor="email">Email:</label>
+        <input
+          id="email"
+          data-testid="email-input"
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+        />
+        <br />
+
+        <label htmlFor="password">Password:</label>
+        <input
+          id="password"
+          data-testid="password-input"
+          type="password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+        />
+        <br />
+
+        <button data-testid="login-button" type="submit">Login</button>
+      </form>
+      {message && <div data-testid="login-message">{message}</div>}
+    </div>
+  );
+}
+
+export default App;
+
+// for the scenario login credentials the following code used for checking the outcomes of the app tested for the login checks//
+const { remote } = require('webdriverio');
+
+describe('Login Form Test Scenarios', () => {
+  let browser;
+
+  beforeAll(async () => {
+    browser = await remote({
+      logLevel: 'error',
+      capabilities: { browserName: 'chrome' }
+    });
+  });
+
+  afterAll(async () => {
+    await browser.deleteSession();
+  });
+
+  it('should login successfully with correct credentials', async () => {
+    await browser.url('http://localhost:3000');
+    await browser.$('[data-testid="email-input"]').setValue('test@example.com');
+    await browser.$('[data-testid="password-input"]').setValue('password');
+    await browser.$('[data-testid="login-button"]').click();
+    const message = await browser.$('[data-testid="login-message"]').getText();
+    expect(message).toBe('Login successful!');
+  });
+
+  it('should display error message with incorrect credentials', async () => {
+    await browser.url('http://localhost:3000');
+    await browser.$('[data-testid="email-input"]').setValue('wrong@example.com');
+    await browser.$('[data-testid="password-input"]').setValue('wrongpass');
+    await browser.$('[data-testid="login-button"]').click();
+    const message = await browser.$('[data-testid="login-message"]').getText();
+    expect(message).toBe('Invalid credentials');
+  });
+});
+
+
+ for the above script guidelines
+//Running the script above with commands to perform the login scenario//
+1.Make sure your React app is running on http://localhost:3000.
+2.Install Dependencies
+//npm install --save-dev webdriverio @wdio/cli @wdio/local-runner @wdio/mocha-framework//
+3.Save the script above as login.spec.js in your test folder.
+4.Run tests with //npx wdio run wdio.conf.js//
+
+// Test Scenario: Login Form Credential Check
+Test Case 1: Successful Login
+Steps:
+
+1.Launch the application.
+2.Enter a valid email: test@example.com.
+3.Enter a valid password: password.
+4.Click the Login button.
+5.Assert that the message "Login successful!" appears.
+
+Test Case 2: Unsuccessful Login (Invalid Credentials)
+Steps:
+
+1.Launch the application.
+2.Enter an invalid email: wrong@example.com.
+3.Enter an invalid password: wrongpass.
+4.Click the Login button.
+5.Assert that the message "Invalid credentials" appears.
+
+//Expected Result
+Test Case Email	                Password	Expected Result
+1	 test@example.com	password	Login successful!
+2	 wrong@example.com	wrongpass	Invalid credentials
+
+//Automate the scenario "Creating a new item" in a React app using Selenium with the WebDriverIO test framework.
+import React, { useState } from 'react';
+
+export default function AddItem({ onAdd }) {
+  const [name, setName] = useState('');
+  const [message, setMessage] = useState('');
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (name.trim() === '') {
+      setMessage('Item name is required');
+      return;
+    }
+    onAdd(name);
+    setMessage('Item added!');
+    setName('');
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        data-testid="item-input"
+        value={name}
+        onChange={e => setName(e.target.value)}
+        placeholder="Enter item name"
+      />
+      <button data-testid="add-button" type="submit">Add Item</button>
+      {message && <span data-testid="add-message">{message}</span>}
+    </form>
+  );
+}
+
+//test automation
+const { remote } = require('webdriverio');
+
+describe('Create New Item', () => {
+  let browser;
+
+  beforeAll(async () => {
+    browser = await remote({
+      logLevel: 'error',
+      capabilities: { browserName: 'chrome' }
+    });
+  });
+
+  afterAll(async () => {
+    await browser.deleteSession();
+  });
+
+  it('should add a new item successfully', async () => {
+    await browser.url('http://localhost:3000');
+
+    // Enter an item name
+    const input = await browser.$('[data-testid="item-input"]');
+    await input.setValue('My New Item');
+
+    // Click the add button
+    const addButton = await browser.$('[data-testid="add-button"]');
+    await addButton.click();
+
+    // Assert feedback message
+    const addMsg = await browser.$('[data-testid="add-message"]');
+    const msgText = await addMsg.getText();
+    expect(msgText).toBe('Item added!');
+  });
+
+  it('should show error if item name is empty', async () => {
+    await browser.url('http://localhost:3000');
+    const addButton = await browser.$('[data-testid="add-button"]');
+    await addButton.click();
+
+    const addMsg = await browser.$('[data-testid="add-message"]');
+    const msgText = await addMsg.getText();
+    expect(msgText).toBe('Item name is required');
+  });
+});
+
+
+//Performing the Test scenario//
+Test 1: Enters "My New Item" and clicks Add. Expects "Item added!"
+Test 2: Clicks Add with an empty field. Expects "Item name is required"
+//"Editing an existing item" scenario using Selenium with the WebDriverIO test framework //
+<ul>
+  {items.map((item, idx) => (
+    <li key={item.id}>
+      <span data-testid={`item-label-${idx}`}>{item.name}</span>
+      <button data-testid={`edit-btn-${idx}`} onClick={() => startEditing(idx)}>Edit</button>
+      {editingIdx === idx && (
+        <>
+          <input data-testid="edit-input" value={editValue} onChange={e => setEditValue(e.target.value)} />
+          <button data-testid="save-btn" onClick={saveEdit}>Save</button>
+        </>
+      )}
+    </li>
+  ))}
+</ul>
+//Editing an item//
+const { remote } = require('webdriverio');
+
+describe('Edit Existing Item', () => {
+  let browser;
+
+  beforeAll(async () => {
+    browser = await remote({
+      logLevel: 'error',
+      capabilities: { browserName: 'chrome' }
+    });
+  });
+
+  afterAll(async () => {
+    await browser.deleteSession();
+  });
+
+  it('should edit an existing item', async () => {
+    await browser.url('http://localhost:3000');
+
+    // Assume the first item exists and has the label 'Old Name'
+    const itemLabel = await browser.$('[data-testid="item-label-0"]');
+    const originalText = await itemLabel.getText();
+    expect(originalText).toBe('Old Name');
+
+    // Click the Edit button for the first item
+    const editButton = await browser.$('[data-testid="edit-btn-0"]');
+    await editButton.click();
+
+    // Edit the item value
+    const editInput = await browser.$('[data-testid="edit-input"]');
+    await editInput.setValue('New Name');
+
+    // Click Save
+    const saveButton = await browser.$('[data-testid="save-btn"]');
+    await saveButton.click();
+
+    // Verify the item label is updated
+    const updatedLabel = await browser.$('[data-testid="item-label-0"]');
+    const updatedText = await updatedLabel.getText();
+    expect(updatedText).toBe('New Name');
+  });
+});
+//steps for the above Scenario for performing the test Automation
+Key Steps:
+
+1.Navigate to the page.
+2.Locate the item to edit.
+3.Click the Edit button and modify the value.
+4.Save changes and verify the UI reflects the new value. 
+
+//deleting an item" scenario using Selenium with the WebDriverIO test framework//
+<ul>
+  {items.map((item, idx) => (
+    <li key={item.id}>
+      <span data-testid={`item-label-${idx}`}>{item.name}</span>
+      <button data-testid={`delete-btn-${idx}`} onClick={() => handleDelete(idx)}>Delete</button>
+    </li>
+  ))}
+</ul>
+//selenium test
+const { remote } = require('webdriverio');
+
+describe('Delete Item', () => {
+  let browser;
+
+  beforeAll(async () => {
+    browser = await remote({
+      logLevel: 'error',
+      capabilities: { browserName: 'chrome' }
+    });
+  });
+
+  afterAll(async () => {
+    await browser.deleteSession();
+  });
+
+  it('should delete an existing item from the list', async () => {
+    await browser.url('http://localhost:3000');
+
+    // Confirm the item exists before deletion
+    const itemLabel = await browser.$('[data-testid="item-label-0"]');
+    const itemText = await itemLabel.getText();
+    expect(itemText).toBe('My Item');
+
+    // Click the delete button for the first item
+    const deleteButton = await browser.$('[data-testid="delete-btn-0"]');
+    await deleteButton.click();
+
+    // Wait for the item to be removed from the DOM
+    await browser.pause(500); // Adjust as needed based on UI update speed
+
+    // Verify the item is no longer present
+    const allLabels = await browser.$$('[data-testid^="item-label-"]');
+    const texts = await Promise.all(allLabels.map(async (el) => await el.getText()));
+    expect(texts).not.toContain('My Item');
+  });
+});
+
+//Performing the Test scenario for the above test Automation 
+Key Steps:
+
+1.Visit the app’s page.
+2.Confirm the item exists.
+3.Click the corresponding Delete button.
+4.Optionally pause/wait for UI update.
+5.Verify the item is no longer present in the list.
+//creating, editing, and deleting items in a list, and each item is rendered with a unique data-testid. After performing actions (add, edit, delete), you want to verify the UI reflects the expected data.
+//Asserting Data Presence After Actions
+
+Adding a new item and asserting its presence.
+Editing an item and asserting the new value.
+Deleting an item and asserting its absence.
+//code
+const { remote } = require('webdriverio');
+
+describe('React App - Assert presence of expected data after actions', () => {
+  let browser;
+
+  beforeAll(async () => {
+    browser = await remote({
+      logLevel: 'error',
+      capabilities: { browserName: 'chrome' }
+    });
+  });
+
+  afterAll(async () => {
+    await browser.deleteSession();
+  });
+
+  it('should add a new item and verify its presence', async () => {
+    await browser.url('http://localhost:3000');
+    await browser.$('[data-testid="item-input"]').setValue('Test Item');
+    await browser.$('[data-testid="add-button"]').click();
+
+    // Assert the new item appears in the list
+    const allLabels = await browser.$$('[data-testid^="item-label-"]');
+    const texts = await Promise.all(allLabels.map(async (el) => await el.getText()));
+    expect(texts).toContain('Test Item');
+  });
+
+  it('should edit an item and verify the updated value', async () => {
+    await browser.url('http://localhost:3000');
+
+    // Edit the first item
+    await browser.$('[data-testid="edit-btn-0"]').click();
+    const editInput = await browser.$('[data-testid="edit-input"]');
+    await editInput.setValue('Edited Item');
+    await browser.$('[data-testid="save-btn"]').click();
+
+    // Assert the updated value is present
+    const updatedLabel = await browser.$('[data-testid="item-label-0"]');
+    const updatedText = await updatedLabel.getText();
+    expect(updatedText).toBe('Edited Item');
+  });
+
+  it('should delete an item and verify its absence', async () => {
+    await browser.url('http://localhost:3000');
+
+    // Get text of the first item before deletion
+    const itemLabel = await browser.$('[data-testid="item-label-0"]');
+    const itemText = await itemLabel.getText();
+
+    // Delete the first item
+    await browser.$('[data-testid="delete-btn-0"]').click();
+    await browser.pause(500); // wait for UI update
+
+    // Assert the item is no longer in the list
+    const allLabels = await browser.$$('[data-testid^="item-label-"]');
+    const texts = await Promise.all(allLabels.map(async (el) => await el.getText()));
+    expect(texts).not.toContain(itemText);
+  });
+});
+//Performing the Test Scenario for the Automation
+1.After adding, the test asserts the list contains the new item.
+2.After editing, it asserts the new text is present.
+3.After deleting, it asserts the deleted item is absent.
+
+
+// TEST Automation for postmann for nodejs Example app
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+
+const app = express();
+const PORT = 3001;
+
+app.use(cors());
+app.use(bodyParser.json());
+
+const USERS = [
+  { email: "test@example.com", password: "password123" }
+];
+
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  const found = USERS.find(u => u.email === email && u.password === password);
+
+  if (found) {
+    // In real world, you would return JWT or session token
+    res.status(200).json({ token: "dummy-token", message: "Login successful" });
+  } else {
+    res.status(401).json({ error: "Invalid credentials" });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+// postmann
+{
+  "info": {
+    "name": "Login API Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login - Success",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "http://localhost:3001/login", "protocol": "http", "host": ["localhost"], "port": "3001", "path": ["login"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Response has token\", function () {",
+              "    var json = pm.response.json();",
+              "    pm.expect(json).to.have.property('token');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login - Failure",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": { "raw": "http://localhost:3001/login", "protocol": "http", "host": ["localhost"], "port": "3001", "path": ["login"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"wrong@example.com\",\n  \"password\": \"wrongpass\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 401\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "pm.test(\"Response has error\", function () {",
+              "    var json = pm.response.json();",
+              "    pm.expect(json).to.have.property('error');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+//steps for the above postmann tool for the first performed scenario
+How to use:
+
+Start the backend: node server.js (in the backend folder).
+Start the frontend (e.g., npm start in frontend).
+Import the Postman collection and run both "Login - Success" and "Login - Failure" tests.
+
+// positive and negative test cases
+Here are positive and negative test case scenarios for the POST /login endpoint of your Node.js backend:
+Positive Test Case Scenarios
+Test Case ID	Description	               Input	                                     Expected Output
+TC_LOGIN_01	Valid user credentials	email: test@example.com<br>password: password123    Status 200, JSON with token and message "Login successful"
+
+Negative Test Case Scenarios
+
+Test Case ID	Description	           Input	                                            Expected Output
+TC_LOGIN_02	Invalid email	        email: wrong@example.com<br>password: password123	Status 401, JSON with error "Invalid credentials"
+TC_LOGIN_03	Invalid password	email: test@example.com<br>password: wrongpass	        Status 401, JSON with error "Invalid credentials"
+TC_LOGIN_04	Both fields empty	email: ""<br>password: ""	                        Status 401, JSON with error "Invalid credentials"
+TC_LOGIN_05	Missing email field	password: password123	                                Status 401, JSON with error "Invalid credentials"
+TC_LOGIN_06	Missing password field	email: test@example.com	                                Status 401, JSON with error "Invalid credentials"
+TC_LOGIN_07	Malformed request (not JSON)	Raw text input	                                Status 400 or 401, error about malformed input or invalid credentials
+
+// code for second scenario
+{
+  "info": {
+    "name": "GET /items API Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET /items - Positive",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/items",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3001",
+          "path": ["items"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Response is array with sample items\", function () {",
+              "    var json = pm.response.json();",
+              "    pm.expect(json).to.be.an('array');",
+              "    pm.expect(json.length).to.be.above(0);",
+              "    pm.expect(json[0]).to.have.property('id');",
+              "    pm.expect(json[0]).to.have.property('name');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /itemz - Negative (Invalid Route)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/itemz",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3001",
+          "path": ["itemz"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "pm.test(\"Response has error property\", function () {",
+              "    var json = pm.response.json();",
+              "    pm.expect(json).to.have.property('error');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+
+// Test Cases mentioned below
+GET /items - Positive: Should return array with status 200.
+GET /itemz - Negative: Should return 404 with error property.
+
+// postmann framework scenario 3
+// code
+
+{
+  "info": {
+    "name": "POST /items API Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "POST /items - Positive (Valid Name)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "http://localhost:3001/items",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3001",
+          "path": ["items"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"New Test Item\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "pm.test(\"Response has id and correct name\", function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('id');",
+              "  pm.expect(json.name).to.eql('New Test Item');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST /items - Negative (Missing Name)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "http://localhost:3001/items",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3001",
+          "path": ["items"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{ }"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Response has error\", function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('error');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST /items - Negative (Empty Name)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "http://localhost:3001/items",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3001",
+          "path": ["items"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": \"\" }"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Response has error\", function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('error');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST /items - Negative (Non-string Name)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "http://localhost:3001/items",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3001",
+          "path": ["items"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": 123 }"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Response has error\", function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('error');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+
+// Test case possible for the above scenario
+
+Positive: Valid "name" returns 201 and the new item.
+Negative: Missing, empty, or non-string "name" returns 400 and an error message.
+
+//postmann scenario four
+
+// code
+
+{
+  "info": {
+    "name": "PUT /items/:id API Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "PUT /items/:id - Positive (Valid ID and Name)",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "http://localhost:3001/items/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3001",
+          "path": ["items", "1"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": \"Updated Item Name\" }"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Item name is updated\", function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json.name).to.eql('Updated Item Name');",
+              "  pm.expect(json.id).to.eql(1);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT /items/:id - Negative (Non-existent ID)",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "http://localhost:3001/items/9999",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3001",
+          "path": ["items", "9999"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": \"Will Fail\" }"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {",
+              "  pm.response.to.have.status(404);",
+              "});",
+              "pm.test(\"Response has error\", function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('error');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT /items/:id - Negative (Missing Name)",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "http://localhost:3001/items/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3001",
+          "path": ["items", "1"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{ }"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Response has error\", function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('error');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PUT /items/:id - Negative (Empty Name)",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "http://localhost:3001/items/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3001",
+          "path": ["items", "1"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": \"\" }"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Response has error\", function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('error');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+
+//Test Cases possible for the scenario
+
+Positive: Valid ID and valid name.
+Negative: Non-existent ID, missing name, or empty name (all should return appropriate errors).
+
+// postmann scenario five
+
+code
+{
+  "info": {
+    "name": "DELETE /items/:id API Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "DELETE /items/:id - Positive (Valid ID)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/items/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3001",
+          "path": ["items", "1"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204\", function () {",
+              "  pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DELETE /items/:id - Negative (Non-existent ID)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/items/9999",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3001",
+          "path": ["items", "9999"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {",
+              "  pm.response.to.have.status(404);",
+              "});",
+              "pm.test(\"Response has error\", function () {",
+              "  var json = pm.response.json();",
+              "  pm.expect(json).to.have.property('error');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+
+//Test Case possiblities
+Positive: Delete with existing ID returns 204.
+Negative: Delete with non-existent ID returns 404 and an error.
+
+
+
+
+
