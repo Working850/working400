@@ -1,0 +1,8 @@
+Test Plan
+1. Initially covered the setup instructions using the commands supported with the react and nodejs that help to support the webdriver io selenium and postmann for testing both frondend and backend
+2 Tested both the functional UI using selenium and API test automation using postmann tools to get maximum test case possiblities covering.
+3. Performed mentioned test case scenarios that help to find the success/Unsuccessful Test results for the app build and used the automation tools.
+4. Initially READme file includes the app followed by the instructions and performing the steps for the automation with code scripts and final outcomes of the Testcase Results.
+5. Covered almost all the scenarios with atmost testing and scripted and documented according to the app build with reactjs and nodejs performing the directions given in the instructions file of the task.
+6. Final review is done and documented the complete file in the complation form by mentioning the link with read.me file in my GitHub repository with the documentation file which is the complete steps file of the test plan with the complete information is the one that iam attaching in the same repository.
+7. Final assumptions moreover both automation tools used found to be the best ways to find the results as per the process of automation testing to make the webapplication more interactive without any bugs and defects to make userfriendly making it more clear for the working and usage.
